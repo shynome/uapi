@@ -1,32 +1,41 @@
-// import { serve } from "https://deno.land/std@0.56.0/http/server.ts"";
+import { ServerRequest } from "./deps.ts";
+import { Router } from "./router.ts";
+import * as NotFoundModule from "./404.ts";
+import { fillHost } from "./utils.ts";
 
-/**api config */
+/**api config. now nothing can be config */
 export interface Config {}
 
-export interface RouteConfig {
-  [path: string]: string | RouteConfig
-}
-
 export interface Handler {
-  (req: any): any
+  (req: ServerRequest): any;
 }
 
-export interface Router {
-  default: Handler
-  config: Config
+export interface APIModule {
+  default: Handler;
+  config: Config;
 }
 
-export interface RouteRule {
-  regexp: RegExp
-  module: string
-}
-
-export const findModule = (rules: RouteRule[]) => (path: string) => {
-  for (let rule of rules) {
-    if (rule.regexp.test(path) == false) {
-      continue
+export const buildHandler = (router: Router) => {
+  return async (req: ServerRequest) => {
+    let host = req.headers.get("host") || fillHost;
+    let mpath = router.findModule(host, req.url);
+    let module: APIModule = mpath === "" ? NotFoundModule : await import(mpath);
+    if (typeof module.default !== "function") {
+      module = NotFoundModule as any as APIModule;
     }
-    return rule.module
-  }
-  return ''
-}
+    let response = await module.default(req);
+    if (req.w.buffered() === 0) {
+      if (
+        typeof response === "string" ||
+        response instanceof Uint8Array ||
+        typeof response.read === "function"
+      ) {
+        req.respond({ body: response });
+      } else if (typeof response === "object") {
+        req.respond(response);
+      } else {
+        req.respond({ status: 500, body: "bad logic way" });
+      }
+    }
+  };
+};
