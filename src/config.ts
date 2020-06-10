@@ -1,5 +1,5 @@
 import { RouteConfig } from "./router.ts";
-import { basedir, fillHost } from "./utils.ts";
+import { basedir, normalizePath } from "./utils.ts";
 
 interface RouteItem {
   path: string;
@@ -21,6 +21,10 @@ export function parseConfig(config: RouteConfig, basepath: string = "") {
       continue;
     }
   }
+  rules = rules.map((r) => {
+    r.module = normalizePath(r.module);
+    return r;
+  });
   return rules;
 }
 

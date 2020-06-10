@@ -36,12 +36,18 @@ export class Router {
         let _rules = parseConfig(config);
         let rules: Rules = {};
         for (let { path, module } of _rules) {
-          let host = path.split("/", 1)[0];
-          path = path.slice(host.length);
+          let host: string;
+          if (path.startsWith("/")) {
+            host = fillHost;
+            path = path;
+          } else {
+            host = path.split("/", 1)[0];
+            path = path.slice(host.length);
+          }
           let xrules = rules[host] || (rules[host] = []);
           xrules.push({
             regexp: globToRegExp(path, { globstar: true }),
-            module: normalizePath(module),
+            module: module,
           });
         }
         await Promise.all(preheatModules(_rules.map((r) => r.module)));
