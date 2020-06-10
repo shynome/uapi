@@ -1,5 +1,4 @@
-import { RouteRule, RouteConfig } from './uapi.ts'
-import { globToRegExp } from 'https://deno.land/std/path/glob.ts'
+import { RouteConfig } from './router.ts'
 
 interface RouteItem {
   path: string
@@ -31,22 +30,19 @@ export function sortRules(rules: RouteItem[]) {
   return rules
 }
 
-export const parse = (config: RouteConfig): RouteRule[] => {
+export const parseConfig = (config: RouteConfig): RouteItem[] => {
   let rules = normalizeConfig(config)
   rules = sortRules(rules)
-
-  let routeRules = rules.map((rule) => {
-    return {
-      regexp: globToRegExp(rule.path, { globstar: true }),
-      module: rule.module,
-    }
-  })
-
-  return routeRules
+  return rules
 }
 
-export function preheatModules(rules: RouteRule[]) {
-  return rules.map((rule) => import(rule.module))
-}
+let basedir = new URL(Deno.cwd() + '/', 'file://').href
 
-export const loadConfig = () => {}
+export async function loadConfig(config_file: string = 'uapi.map.ts') {
+  config_file = new URL(config_file, 'file://').pathname
+  let { mtime } = await Deno.stat(config_file)
+  config_file = config_file + `?mtime=${mtime?.getTime()}`
+  let import_path = new URL(config_file, basedir).href
+  let config = (await import(import_path)).default
+  return config
+}
