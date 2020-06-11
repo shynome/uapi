@@ -68,7 +68,9 @@ export class Router {
       if (event.kind !== "modify") {
         continue;
       }
-      this.reload();
+      this.reload().catch((e) => {
+        console.error(e);
+      });
     }
   }
 }
