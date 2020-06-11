@@ -18,41 +18,35 @@ type Rules = { [host: string]: RouteRule[] };
 
 export class Router {
   constructor(private config_path: string) {}
-  private reloadLock = false;
+  private version = 0;
   public rules: Rules = {};
-  public reload = () => {
-    if (this.reloadLock) {
-      throw new Error(
-        "The server is still reloading config, wait that finished",
-      );
-    }
-    this.reloadLock = true;
-    return Promise.resolve()
-      .then(async () => {
-        let config = await loadConfig(this.config_path);
-        let _rules = parseConfig(config);
-        let rules: Rules = {};
-        for (let { path, module } of _rules) {
-          let host: string;
-          if (path.startsWith("/")) {
-            host = fillHost;
-            path = path;
-          } else {
-            host = path.split("/", 1)[0];
-            path = path.slice(host.length);
-          }
-          let xrules = rules[host] || (rules[host] = []);
-          xrules.push({
-            regexp: globToRegExp(path, { globstar: true }),
-            module: module,
-          });
-        }
-        await Promise.all(preheatModules(_rules.map((r) => r.module)));
-        this.rules = rules;
-      })
-      .finally(() => {
-        this.reloadLock = false;
+  public reload = async () => {
+    const currentCommitVersion = this.version + 1;
+    this.version = currentCommitVersion;
+    let config = await loadConfig(this.config_path);
+    let _rules = parseConfig(config);
+    let rules: Rules = {};
+    for (let { path, module } of _rules) {
+      let host: string;
+      if (path.startsWith("/")) {
+        host = fillHost;
+        path = path;
+      } else {
+        host = path.split("/", 1)[0];
+        path = path.slice(host.length);
+      }
+      let xrules = rules[host] || (rules[host] = []);
+      xrules.push({
+        regexp: globToRegExp(path, { globstar: true }),
+        module: module,
       });
+    }
+    await Promise.all(preheatModules(_rules.map((r) => r.module)));
+    if (currentCommitVersion < this.version) {
+      // if has other higher commit version reload start, just exit
+      return;
+    }
+    this.rules = rules;
   };
   public init = async () => {
     await this.reload();
@@ -68,4 +62,13 @@ export class Router {
     }
     return "";
   };
+  public watchConfigFile() {
+    const watcher = Deno.watchFs(this.config_path);
+    for await (const event of watcher) {
+      if (event.kind !== "modify") {
+        continue;
+      }
+      this.reload();
+    }
+  }
 }
