@@ -53,7 +53,7 @@ export class Router {
   };
   public findModule = (host: string, path: string) => {
     path = new URL(path, "http://x").pathname;
-    let rules = this.rules[host] || this.rules[fillHost];
+    let rules = this.rules[host] || this.rules[fillHost] || [];
     for (let rule of rules) {
       if (rule.regexp.test(path) == false) {
         continue;
