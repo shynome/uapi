@@ -6,7 +6,7 @@ your serverless framework with typescript base on deno
 
 ### Configure
 
-create a configure file `uapi.map.ts`
+create a configure file `uapi.config.ts`
 
 ```ts
 export default {
@@ -31,4 +31,4 @@ export default {
 deno run -A https://deno.land/x/uapi/start.ts
 ```
 
-if you change `uapi.map.ts` file, the server will hot reload config
+if you change `uapi.config.ts` file, the server will hot reload config
