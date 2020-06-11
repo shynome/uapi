@@ -1,6 +1,7 @@
 import { loadConfig, parseConfig } from "./config.ts";
 import { globToRegExp } from "./deps.ts";
 import { normalizePath, fillHost } from "./utils.ts";
+import { preheatModules } from "./module-cache.ts";
 
 export interface RouteConfig {
   [path: string]: string | RouteConfig;
@@ -9,10 +10,6 @@ export interface RouteConfig {
 export interface RouteRule {
   regexp: RegExp;
   module: string;
-}
-
-export function preheatModules(rules: string[]) {
-  return rules.map((m) => import(m));
 }
 
 export const NotFoundModule = new URL("./", import.meta.url);
