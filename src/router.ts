@@ -62,7 +62,7 @@ export class Router {
     }
     return "";
   };
-  public watchConfigFile() {
+  public async watchConfigFile() {
     const watcher = Deno.watchFs(this.config_path);
     for await (const event of watcher) {
       if (event.kind !== "modify") {
