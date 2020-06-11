@@ -1,0 +1,15 @@
+version: "3.6"
+
+services:
+  uapi:
+    image: shynome/deno
+    command: run -A https://raw.githubusercontent.com/shynome/uapi/master/start.ts
+    working_dir: /home/deno/uapi
+    ports:
+      - 8000:8000
+    volumes:
+      - ./example:/home/deno/uapi
+      - deno_cache:/home/deno/.cache/deno
+
+volumes:
+  deno_cache:
