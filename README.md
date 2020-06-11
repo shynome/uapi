@@ -25,9 +25,6 @@ export default {
 };
 ```
 
-Todo:
-- [] reload config when updated config file
-
 ### Run
 
 ```sh
