@@ -30,3 +30,5 @@ export default {
 ```sh
 deno run -A https://deno.land/x/uapi/start.ts
 ```
+
+if you change `uapi.map.ts` file, the server will hot reload config
