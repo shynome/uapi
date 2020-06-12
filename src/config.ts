@@ -1,7 +1,7 @@
 import { RouteConfig } from "./router.ts";
 import { basepath } from "./utils.ts";
 
-interface RouteItem {
+export interface RouteItem {
   path: string;
   module: string;
 }
