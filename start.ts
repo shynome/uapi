@@ -14,11 +14,5 @@ await router.init();
 console.log(`http://localhost:${port}/`);
 
 for await (const req of s) {
-  handle(req).catch((err) => {
-    console.error(err);
-    req.respond({
-      status: 500,
-      body: "Internal server error",
-    });
-  });
+  handle(req);
 }
