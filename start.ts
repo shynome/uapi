@@ -7,7 +7,7 @@ let config_filepath = Deno.env.get("CONF_PATH") || "uapi.config.ts";
 const s = serve({ port: Number(port) });
 
 const router = new Router(config_filepath);
-router.watchConfigFile()
+router.watchConfigFile();
 const handle = buildHandler(router);
 
 await router.init();
