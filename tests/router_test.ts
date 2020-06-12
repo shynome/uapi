@@ -57,6 +57,8 @@ Deno.test("router reload ", async () => {
   const router = new Router("");
   const a = { path: "/a", module: getFullpath("../example/a.ts") };
   const b = { path: "/b", module: getFullpath("../example/b.ts") };
+  const c = { path: "/c", module: getFullpath("../example/c.ts") };
+
   await Promise.all([
     router.reload([a, b]),
     router.reload([a]),
@@ -65,4 +67,12 @@ Deno.test("router reload ", async () => {
   assertEquals(m1, "");
   const m2 = router.findModule("x", "/a");
   assertEquals(m2, a.module);
+
+  // case reload fail
+  const r = await router.reload([c]).then(() => 0, () => 1);
+  assertEquals(r, 1);
+  const m3 = router.findModule("x", "/c");
+  const m4 = router.findModule("x", "/a");
+  assertEquals(m3, "");
+  assertEquals(m4, a.module);
 });
