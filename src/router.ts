@@ -21,20 +21,16 @@ export class Router {
     private config_path: string,
     public mcache = new ModuleCache(),
   ) {}
-  private version = 0;
+
   public rules: Rules = {};
-  public reload = async (
-    rules: RouteItem[],
-    reloadModuleCache = true,
-    commitVersion = this.getCommitVersion(),
-  ) => {
+  static transformRules = (rules: RouteItem[]): [Rules, string[]] => {
     // normalize module path
     rules = rules.map((r) => {
       r.module = normalizePath(r.module);
       return r;
     });
 
-    let newRules: Rules = {};
+    const newRules: Rules = {};
     for (let { path, module } of rules) {
       let host: string;
       if (path.startsWith("/")) {
@@ -51,19 +47,34 @@ export class Router {
       });
     }
 
+    const newModules = rules.map((r) => r.module);
+
+    return [newRules, newModules];
+  };
+
+  private version = 0;
+  // if has other higher commit version reload start, just exit
+  private hasNewCommitVersion = (version: number) => version < this.version;
+  public getCommitVersion = () => {
+    const currentCommitVersion = this.version + 1;
+    this.version = currentCommitVersion;
+    return currentCommitVersion;
+  };
+
+  public reload = async (
+    rules: RouteItem[],
+    reloadModuleCache = true,
+    commitVersion = this.getCommitVersion(),
+  ) => {
+    const [newRules, newModules] = Router.transformRules(rules);
     if (reloadModuleCache) {
-      let newModules = rules.map((r) => r.module);
       await this.reloadModuleCache(newModules, commitVersion);
     }
-
     if (this.hasNewCommitVersion(commitVersion)) {
       return;
     }
     this.rules = newRules;
   };
-
-  // if has other higher commit version reload start, just exit
-  private hasNewCommitVersion = (version: number) => version < this.version;
 
   public async reloadModuleCache(modules: string[], commitVersion: number) {
     await this.mcache.preheat(modules);
@@ -72,12 +83,6 @@ export class Router {
     }
     this.mcache.reset(modules); // don't need wait, just clear old module cache
   }
-
-  public getCommitVersion = () => {
-    const currentCommitVersion = this.version + 1;
-    this.version = currentCommitVersion;
-    return currentCommitVersion;
-  };
 
   public reloadConfig = async () => {
     let config = await loadConfig(this.config_path);
