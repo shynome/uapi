@@ -53,7 +53,7 @@ Deno.test({
   sanitizeOps: false,
 });
 Deno.test({
-  name: "uapi error api",
+  name: "uapi error api e",
   fn: async () => {
     const { router, s, handle, fetchStatusCode } = preset();
     try {
@@ -61,11 +61,58 @@ Deno.test({
       await router.reload([e]);
       let h = new Promise<boolean>(async (rl) => {
         for await (const req of s) {
-          handle(req).then((r) => rl(r.kind === ResponseKind.Error));
+          await handle(req).then((r) => rl(r.kind === ResponseKind.Error));
           break;
         }
       });
       let r = await fetchStatusCode("/e");
+      assertEquals(r, 500);
+      let hasError = await h;
+      assertEquals(hasError, true);
+    } finally {
+      s.close();
+    }
+  },
+  sanitizeOps: false,
+});
+Deno.test({
+  name: "uapi error api f",
+  fn: async () => {
+    const { router, s, handle, fetchStatusCode } = preset();
+    try {
+      const e = { path: "/f", module: getFullpath("../example/f.ts") };
+      await router.reload([e]);
+      let h = new Promise<boolean>(async (rl) => {
+        for await (const req of s) {
+          await handle(req).then((r) => rl(r.kind === ResponseKind.Error));
+          break;
+        }
+      });
+      let r = await fetchStatusCode("/f");
+      assertEquals(r, 500);
+      let hasError = await h;
+      assertEquals(hasError, true);
+    } finally {
+      s.close();
+    }
+  },
+  sanitizeOps: false,
+});
+Deno.test({
+  name: "uapi error api g",
+  ignore: true,
+  fn: async () => {
+    const { router, s, handle, fetchStatusCode } = preset();
+    try {
+      const e = { path: "/g", module: getFullpath("../example/g.ts") };
+      await router.reload([e]);
+      let h = new Promise<boolean>(async (rl) => {
+        for await (const req of s) {
+          await handle(req).then((r) => rl(r.kind === ResponseKind.Error));
+          break;
+        }
+      });
+      let r = await fetchStatusCode("/g");
       assertEquals(r, 500);
       let hasError = await h;
       assertEquals(hasError, true);
