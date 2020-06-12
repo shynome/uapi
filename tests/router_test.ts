@@ -1,6 +1,7 @@
 import { Router } from "../src/mod.ts";
 import { assertEquals } from "./deps.ts";
-import { normalizePath } from "../src/utils.ts";
+import { normalizePath, makeGetFullpath } from "../src/utils.ts";
+const getFullpath = makeGetFullpath(import.meta.url);
 
 Deno.test("router", () => {
   const router = new Router("");
@@ -51,4 +52,17 @@ Deno.test("router match", () => {
     let m1 = router.findModule("x", path);
     assertEquals(m1, m);
   }
+});
+Deno.test("router reload ", async () => {
+  const router = new Router("");
+  const a = { path: "/a", module: getFullpath("../example/a.ts") };
+  const b = { path: "/b", module: getFullpath("../example/b.ts") };
+  await Promise.all([
+    router.reload([a, b]),
+    router.reload([a]),
+  ]);
+  const m1 = router.findModule("x", "/b");
+  assertEquals(m1, "");
+  const m2 = router.findModule("x", "/a");
+  assertEquals(m2, a.module);
 });
