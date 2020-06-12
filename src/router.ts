@@ -25,6 +25,11 @@ export class Router {
     this.version = currentCommitVersion;
     let config = await loadConfig(this.config_path);
     let _rules = parseConfig(config);
+    // normalize module path
+    _rules = _rules.map((r) => {
+      r.module = normalizePath(r.module);
+      return r;
+    });
     let rules: Rules = {};
     for (let { path, module } of _rules) {
       let host: string;
@@ -41,7 +46,7 @@ export class Router {
         module: module,
       });
     }
-    let newImportModules = _rules.map((r) => normalizePath(r.module));
+    let newImportModules = _rules.map((r) => r.module);
     await this.mcache.preheat(newImportModules);
     if (currentCommitVersion < this.version) {
       // if has other higher commit version reload start, just exit
