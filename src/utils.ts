@@ -1,5 +1,8 @@
-export const basedir = new URL(Deno.cwd() + "/", "file://").href;
-
-export const normalizePath = (path: string) => new URL(path, basedir).href;
+export const basepath = new URL(Deno.cwd() + "/", "file://").href;
 
 export const fillHost = "x";
+
+export const makeGetFullpath = (baseurl: string) =>
+  (path: string) => new URL(path, baseurl).href;
+
+export const normalizePath = makeGetFullpath(basepath);
