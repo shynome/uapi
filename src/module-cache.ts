@@ -1,5 +1,5 @@
 export class ModuleCache {
-  private cache: { [k: string]: any } = {};
+  private cache: { [k: string]: Promise<any> } = {};
   public import = (mod: string) => {
     this.cache[mod] = this.cache[mod] || import(mod);
     return this.cache[mod];
