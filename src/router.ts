@@ -1,7 +1,7 @@
 import { loadConfig, parseConfig } from "./config.ts";
 import { globToRegExp } from "./deps.ts";
 import { normalizePath, fillHost } from "./utils.ts";
-import { preheatModules } from "./module-cache.ts";
+import { moduleCache } from "./module-cache.ts";
 
 export interface RouteConfig {
   [path: string]: string | RouteConfig;
@@ -17,7 +17,7 @@ export const NotFoundModule = new URL("./", import.meta.url);
 type Rules = { [host: string]: RouteRule[] };
 
 export class Router {
-  constructor(private config_path: string) {}
+  constructor(private config_path: string, private mcache = moduleCache) {}
   private version = 0;
   public rules: Rules = {};
   public reload = async () => {
@@ -41,11 +41,13 @@ export class Router {
         module: module,
       });
     }
-    await Promise.all(preheatModules(_rules.map((r) => r.module)));
+    let newImportModules = _rules.map((r) => r.module);
+    await this.mcache.preheat(newImportModules);
     if (currentCommitVersion < this.version) {
       // if has other higher commit version reload start, just exit
       return;
     }
+    this.mcache.reset(newImportModules); // don't need wait, just clear old module cache
     this.rules = rules;
   };
   public init = async () => {
