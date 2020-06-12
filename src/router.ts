@@ -1,4 +1,4 @@
-import { loadConfig, parseConfig } from "./config.ts";
+import { loadConfig, parseConfig, RouteItem } from "./config.ts";
 import { globToRegExp } from "./deps.ts";
 import { normalizePath, fillHost } from "./utils.ts";
 import { ModuleCache } from "./module-cache.ts";
@@ -23,18 +23,18 @@ export class Router {
   ) {}
   private version = 0;
   public rules: Rules = {};
-  public reload = async () => {
-    const currentCommitVersion = this.version + 1;
-    this.version = currentCommitVersion;
-    let config = await loadConfig(this.config_path);
-    let _rules = parseConfig(config);
+  public reload = async (
+    rules: RouteItem[],
+    commitVersion = this.getCommitVersion(),
+  ) => {
     // normalize module path
-    _rules = _rules.map((r) => {
+    rules = rules.map((r) => {
       r.module = normalizePath(r.module);
       return r;
     });
-    let rules: Rules = {};
-    for (let { path, module } of _rules) {
+
+    let newRules: Rules = {};
+    for (let { path, module } of rules) {
       let host: string;
       if (path.startsWith("/")) {
         host = fillHost;
@@ -43,23 +43,35 @@ export class Router {
         host = path.split("/", 1)[0];
         path = path.slice(host.length);
       }
-      let xrules = rules[host] || (rules[host] = []);
+      let xrules = newRules[host] || (newRules[host] = []);
       xrules.push({
         regexp: globToRegExp(path, { globstar: true }),
         module: module,
       });
     }
-    let newImportModules = _rules.map((r) => r.module);
+
+    let newImportModules = rules.map((r) => r.module);
     await this.mcache.preheat(newImportModules);
-    if (currentCommitVersion < this.version) {
+    if (commitVersion < this.version) {
       // if has other higher commit version reload start, just exit
       return;
     }
     this.mcache.reset(newImportModules); // don't need wait, just clear old module cache
-    this.rules = rules;
+
+    this.rules = newRules;
+  };
+  public getCommitVersion = () => {
+    const currentCommitVersion = this.version + 1;
+    this.version = currentCommitVersion;
+    return currentCommitVersion;
+  };
+  public reloadConfig = async () => {
+    let config = await loadConfig(this.config_path);
+    let rules = parseConfig(config);
+    await this.reload(rules);
   };
   public init = async () => {
-    await this.reload();
+    await this.reloadConfig();
   };
   public findModule = (host: string, path: string) => {
     path = new URL(path, "http://x").pathname;
@@ -78,7 +90,7 @@ export class Router {
       if (event.kind !== "modify") {
         continue;
       }
-      this.reload().catch((e) => {
+      this.reloadConfig().catch((e) => {
         console.error(e);
       });
     }
