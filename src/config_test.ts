@@ -1,5 +1,5 @@
 import { parseConfig, loadConfig } from "./config.ts";
-import { assertEquals } from "https://deno.land/std@0.56.0/testing/asserts.ts";
+import { assertEquals } from "./deps_test.ts";
 import config from "./config_test.uapi.map.ts";
 
 Deno.test("normalizeConfig", () => {
