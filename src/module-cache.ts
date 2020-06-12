@@ -16,5 +16,3 @@ export class ModuleCache {
     }
   };
 }
-
-export const moduleCache = new ModuleCache();

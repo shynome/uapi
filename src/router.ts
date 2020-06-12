@@ -1,7 +1,7 @@
 import { loadConfig, parseConfig } from "./config.ts";
 import { globToRegExp } from "./deps.ts";
 import { normalizePath, fillHost } from "./utils.ts";
-import { moduleCache } from "./module-cache.ts";
+import { ModuleCache } from "./module-cache.ts";
 
 export interface RouteConfig {
   [path: string]: string | RouteConfig;
@@ -17,7 +17,10 @@ export const NotFoundModule = new URL("./", import.meta.url);
 type Rules = { [host: string]: RouteRule[] };
 
 export class Router {
-  constructor(private config_path: string, private mcache = moduleCache) {}
+  constructor(
+    private config_path: string,
+    private mcache = new ModuleCache(),
+  ) {}
   private version = 0;
   public rules: Rules = {};
   public reload = async () => {
