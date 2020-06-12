@@ -61,6 +61,11 @@ export class Router {
     return currentCommitVersion;
   };
 
+  public reset = (rules: RouteItem[]) => {
+    const [newRules] = Router.transformRules(rules);
+    this.rules = newRules;
+  };
+
   public reload = async (
     rules: RouteItem[],
     reloadModuleCache = true,
