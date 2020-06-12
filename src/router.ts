@@ -19,12 +19,13 @@ type Rules = { [host: string]: RouteRule[] };
 export class Router {
   constructor(
     private config_path: string,
-    private mcache = new ModuleCache(),
+    public mcache = new ModuleCache(),
   ) {}
   private version = 0;
   public rules: Rules = {};
   public reload = async (
     rules: RouteItem[],
+    reloadModuleCache = true,
     commitVersion = this.getCommitVersion(),
   ) => {
     // normalize module path
@@ -50,29 +51,44 @@ export class Router {
       });
     }
 
-    let newImportModules = rules.map((r) => r.module);
-    await this.mcache.preheat(newImportModules);
-    if (commitVersion < this.version) {
-      // if has other higher commit version reload start, just exit
+    if (reloadModuleCache) {
+      let newModules = rules.map((r) => r.module);
+      await this.reloadModuleCache(newModules, commitVersion);
+    }
+
+    if (this.hasNewCommitVersion(commitVersion)) {
       return;
     }
-    this.mcache.reset(newImportModules); // don't need wait, just clear old module cache
-
     this.rules = newRules;
   };
+
+  // if has other higher commit version reload start, just exit
+  private hasNewCommitVersion = (version: number) => version < this.version;
+
+  public async reloadModuleCache(modules: string[], commitVersion: number) {
+    await this.mcache.preheat(modules);
+    if (this.hasNewCommitVersion(commitVersion)) {
+      return;
+    }
+    this.mcache.reset(modules); // don't need wait, just clear old module cache
+  }
+
   public getCommitVersion = () => {
     const currentCommitVersion = this.version + 1;
     this.version = currentCommitVersion;
     return currentCommitVersion;
   };
+
   public reloadConfig = async () => {
     let config = await loadConfig(this.config_path);
     let rules = parseConfig(config);
     await this.reload(rules);
   };
+
   public init = async () => {
     await this.reloadConfig();
   };
+
   public findModule = (host: string, path: string) => {
     path = new URL(path, "http://x").pathname;
     let rules = this.rules[host] || this.rules[fillHost] || [];
@@ -84,6 +100,7 @@ export class Router {
     }
     return "";
   };
+
   public async watchConfigFile() {
     const watcher = Deno.watchFs(this.config_path);
     for await (const event of watcher) {
