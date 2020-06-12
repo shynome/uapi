@@ -1,5 +1,5 @@
 import { RouteConfig } from "./router.ts";
-import { basedir, normalizePath } from "./utils.ts";
+import { basepath } from "./utils.ts";
 
 interface RouteItem {
   path: string;
@@ -21,18 +21,14 @@ export function parseConfig(config: RouteConfig, basepath: string = "") {
       continue;
     }
   }
-  rules = rules.map((r) => {
-    r.module = normalizePath(r.module);
-    return r;
-  });
   return rules;
 }
 
 export async function loadConfig(config_file: string) {
-  config_file = new URL(config_file, basedir).pathname;
+  config_file = new URL(config_file, basepath).pathname;
   let { mtime } = await Deno.stat(config_file);
   config_file = config_file + `?mtime=${mtime?.getTime()}`;
-  let import_path = new URL(config_file, basedir).href;
+  let import_path = new URL(config_file, basepath).href;
   let config = (await import(import_path)).default;
   return config;
 }

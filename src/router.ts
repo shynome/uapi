@@ -41,7 +41,7 @@ export class Router {
         module: module,
       });
     }
-    let newImportModules = _rules.map((r) => r.module);
+    let newImportModules = _rules.map((r) => normalizePath(r.module));
     await this.mcache.preheat(newImportModules);
     if (currentCommitVersion < this.version) {
       // if has other higher commit version reload start, just exit
