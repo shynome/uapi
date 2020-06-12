@@ -2,7 +2,6 @@ import { ServerRequest } from "./deps.ts";
 import { Router } from "./router.ts";
 import * as NotFoundModule from "./404.ts";
 import { fillHost } from "./utils.ts";
-import { moduleCache } from "./module-cache.ts";
 
 /**api config. now nothing can be config */
 export interface Config {}
@@ -22,7 +21,7 @@ export const buildHandler = (router: Router) => {
     let mpath = router.findModule(host, req.url);
     let module: APIModule = mpath === ""
       ? NotFoundModule
-      : await moduleCache.import(mpath);
+      : await router.mcache.import(mpath);
     if (typeof module.default !== "function") {
       module = NotFoundModule as any as APIModule;
     }
