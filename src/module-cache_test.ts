@@ -1,6 +1,6 @@
 import { ModuleCache } from "./module-cache.ts";
 import { makeGetFullpath } from "./utils.ts";
-import { assertEquals } from "./deps_test.ts";
+import { assertEquals } from "../tests/deps.ts";
 
 const getFullpath = makeGetFullpath(import.meta.url);
 
