@@ -1,3 +1,3 @@
-export { assertEquals } from "https://deno.land/std@0.56.0/testing/asserts.ts";
-export { delay } from "https://deno.land/std@0.56.0/async/delay.ts";
-export { serve } from "https://deno.land/std@0.56.0/http/server.ts";
+export { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+export { delay } from "https://deno.land/std/async/delay.ts";
+export { serve } from "https://deno.land/std/http/server.ts";

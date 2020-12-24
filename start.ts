@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.56.0/http/server.ts";
+import { serve } from "https://deno.land/std/http/server.ts";
 import { Router, buildHandler } from "./src/mod.ts";
 
 let port = Deno.env.get("PORT") || "8000";

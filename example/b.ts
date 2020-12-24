@@ -1,4 +1,4 @@
-import type { ServerRequest } from "https://deno.land/std@0.56.0/http/server.ts";
+import type { ServerRequest } from "https://deno.land/std/http/server.ts";
 
 export default (req: ServerRequest) => {
   req.respond({ body: "bbbb" });
