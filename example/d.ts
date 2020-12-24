@@ -1,3 +1,3 @@
 // @ts-ignore
-import("./d1.ts");
+await import("./d1.ts");
 export default () => "error";
