@@ -16,8 +16,8 @@ Deno.test("router match", () => {
     { path: "/a", module: "a" },
     { path: "/b", module: "b" },
     // match all path
-    { path: "/c", module: "c1" },
     { path: "/c/**/*", module: "c2" },
+    { path: "/c", module: "c1" },
     // globstar test
     { path: "/d*", module: "d" },
     // write first, match first
