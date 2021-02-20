@@ -102,24 +102,28 @@ Deno.test({
 Deno.test({
   name: "uapi error api g",
   ignore: false,
-  fn: async () => {
-    const { router, s, handle, fetchStatusCode } = preset();
-    try {
-      const e = { path: "/g", module: getFullpath("../example/g.ts") };
-      await router.reload([e]);
-      let h = new Promise<boolean>(async (rl) => {
-        for await (const req of s) {
-          await handle(req).then((r) => rl(r.kind === ResponseKind.Error));
-          break;
-        }
-      });
-      let r = await fetchStatusCode("/g");
-      assertEquals(r, 500);
-      let hasError = await h;
-      assertEquals(hasError, true);
-    } finally {
-      s.close();
+  fn: async ()=>{
+    async function f() {
+      const { router, s, handle, fetchStatusCode } = preset();
+      try {
+        const e = { path: "/g", module: getFullpath("../example/g.ts") };
+        await router.reload([e]);
+        let h = new Promise<boolean>(async (rl) => {
+          for await (const req of s) {
+            await handle(req).then((r) => rl(r.kind === ResponseKind.Error));
+            break;
+          }
+        });
+        let r = await fetchStatusCode("/g");
+        assertEquals(r, 500);
+        let hasError = await h;
+        assertEquals(hasError, true);
+      } finally {
+        s.close();
+      }
     }
+    await f()
+    await f()
   },
   sanitizeOps: false,
 });
