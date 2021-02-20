@@ -29,6 +29,7 @@ Deno.test({
       for await (const req of s) {
         handle(req);
       }
+      // @ts-ignore
       rl();
     });
     try {
@@ -100,7 +101,7 @@ Deno.test({
 });
 Deno.test({
   name: "uapi error api g",
-  ignore: true,
+  ignore: false,
   fn: async () => {
     const { router, s, handle, fetchStatusCode } = preset();
     try {

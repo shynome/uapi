@@ -92,7 +92,7 @@ Deno.test("router reload fail", async () => {
 });
 Deno.test({
   name: "router reload fail when module dynamic import a wrong path",
-  ignore: true,
+  ignore: false,
   fn: async () => {
     const router = new Router("");
     await router.reload([a]);

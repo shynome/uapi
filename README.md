@@ -1,9 +1,3 @@
-## Warning
-
-dynamic import has a bug, if this bug has been fixed, I will remove this warning and released
-
-https://github.com/denoland/deno/issues/6259
-
 ## Introduction
 
 your serverless framework with typescript base on deno
