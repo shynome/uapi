@@ -31,7 +31,7 @@ export async function getHandlerFilepath(fpath: string): Promise<string> {
       });
       if (stat !== null) {
         const mtime = stat.mtime.getTime();
-        return f + `?mtime=${mtime}`;
+        return `file://${f}?mtime=${mtime}`;
       }
     }
   }
