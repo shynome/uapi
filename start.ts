@@ -10,6 +10,7 @@ if (typeof rootdir !== "string") {
 }
 
 rootdir = path.join(process.cwd(), rootdir);
+console.log("uapi rootdir:", rootdir);
 const uapi = new UAPIRouter(rootdir);
 
 const app = new Hono({
