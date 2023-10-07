@@ -25,6 +25,11 @@ Deno.test("http test", async () => {
     ["/rest-mix", 200, "rest"],
     ["/rest-mix/foo", 200, "rest"],
     ["/rest-mix/foo/bar", 200, "rest all"],
+    // hono
+    ["/hono", 404, null],
+    ["/hono/hello", 200, "hello world"],
+    ["/hono/hello/who?name=shynome", 200, "hello shynome"],
+    ["/hono/foo", 404, null],
   ];
 
   const uapi = new UAPIRouter(path.resolve("./example"));
