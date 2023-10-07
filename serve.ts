@@ -42,9 +42,12 @@ export async function getHandlerFilepath(fpath: string): Promise<string> {
 export function* getTryPaths(fpath: string) {
   yield fpath;
   const farr = fpath.split("/");
-  const rest = path.join(farr.slice(0, -1).join("/"), "[rest]");
-  yield rest;
-  for (let index = farr.length - 1; index > 1; index--) {
+  for (let index = 0; index <= 1; index++) {
+    const n = farr.length - index;
+    const rest = path.join(farr.slice(0, n).join("/"), "[rest]");
+    yield rest;
+  }
+  for (let index = farr.length; index > 1; index--) {
     const restAll = path.join(farr.slice(0, index).join("/"), "[...rest]");
     yield restAll;
   }
