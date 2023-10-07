@@ -22,7 +22,7 @@ export class UAPIRouter {
     const p = path.join(this.rootdir, u.pathname);
     const h = await getHandler(p);
     if (h === null) {
-      throw new HTTPException(404, { message: "no handler" });
+      throw new HTTPException(404, { message: "404 no handler" });
     }
     return h.fetch(req);
   };
