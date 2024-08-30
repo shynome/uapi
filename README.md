@@ -1,5 +1,7 @@
 ### Introduction
 
+[中文版介绍](./README_zh.md)
+
 serverless inspired by Svektekit router, based on deno and hono
 
 ### Use
